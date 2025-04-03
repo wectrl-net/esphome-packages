@@ -12,37 +12,6 @@ This package provides support for the AMDSG08 8-channel DS18B20 temperature sens
 
 ## Installation
 
-There are two ways to use this package:
-
-### Method 1: External Components (Recommended)
-
-Add the following to your ESPHome device configuration:
-
-```yaml
-external_components:
-  - source: github://wectrl-net/esphome-packages
-    components: [amdsg08]
-
-# Configure UART for Modbus
-uart:
-  id: modbus1
-  tx_pin: GPIO1  # Adjust to your hardware
-  rx_pin: GPIO3  # Adjust to your hardware
-  baud_rate: 9600
-  stop_bits: 1
-
-# Include the package
-amdsg08:
-  # Optional: Custom settings (all settings shown below are defaults)
-  amdsg08_prefix: "amdsg08"
-  amdsg08_modbus_address: "0x01"
-  amdsg08_update_interval: 30s
-  amdsg08_sensor_1_name: "DS18B20 Channel 1"
-  # ... other sensor names can be customized as needed
-```
-
-### Method 2: Manual Installation
-
 1. Copy the `amdsg08.yaml` file to your ESPHome configuration directory
 2. Include it in your device configuration:
 
@@ -64,45 +33,83 @@ packages:
 
 - ESPHome 2023.12.0 or newer
 - ESP32 or ESP8266 device
-- Configured Modbus UART component (must have ID: `modbus1`)
+- Configured Modbus UART component
 
 ## Example Configuration
 
 ```yaml
-# Complete example configuration
-esphome:
-  name: temperature_hub
-  platform: ESP32
-  board: esp32dev
-
-# Configure WiFi
-wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
-
-# Enable API and OTA
-api:
-ota:
-
-# Configure UART for Modbus
+# In your device's yaml configuration
 uart:
   id: modbus1
-  tx_pin: GPIO17
-  rx_pin: GPIO16
+  tx_pin: GPIO1
+  rx_pin: GPIO3
   baud_rate: 9600
   stop_bits: 1
 
-# Method 1: Using external components
-external_components:
-  - source: github://wectrl-net/esphome-packages
-    components: [amdsg08]
-
-# Include the AMDSG08 component
-amdsg08:
-  amdsg08_prefix: "temperature"
-  amdsg08_sensor_1_name: "Tank Temperature"
-  amdsg08_sensor_2_name: "Outdoor Temperature"
+packages:
+  amdsg08: !include amdsg08.yaml
 ```
+
+## Using Multiple AMDSG08 Devices
+
+To use multiple AMDSG08 devices on the same RS485 bus, you need to:
+
+1. Create separate configuration files for each device with different prefixes and Modbus addresses
+2. Include these configurations in your main ESPHome configuration
+
+### Step 1: Create Device-Specific Configuration Files
+
+Create a separate file for each device (e.g., `amdsg08_device1.yaml`, `amdsg08_device2.yaml`) with unique substitution values:
+
+**amdsg08_device1.yaml:**
+```yaml
+substitutions:
+  amdsg08_prefix: "amdsg08_1"
+  amdsg08_modbus_address: "0x01"
+  amdsg08_update_interval: 30s
+  amdsg08_sensor_1_name: "Device 1 DS18B20 Channel 1"
+  # ... other substitutions with unique names
+
+# Include the base AMDSG08 package
+<<: !include amdsg08.yaml
+```
+
+**amdsg08_device2.yaml:**
+```yaml
+substitutions:
+  amdsg08_prefix: "amdsg08_2"
+  amdsg08_modbus_address: "0x02"
+  amdsg08_update_interval: 30s
+  amdsg08_sensor_1_name: "Device 2 DS18B20 Channel 1"
+  # ... other substitutions with unique names
+
+# Include the base AMDSG08 package
+<<: !include amdsg08.yaml
+```
+
+### Step 2: Include in Main Configuration
+
+```yaml
+# In your main ESPHome configuration
+uart:
+  id: modbus1
+  tx_pin: GPIO1
+  rx_pin: GPIO3
+  baud_rate: 9600
+  stop_bits: 1
+
+packages:
+  device1: !include amdsg08_device1.yaml
+  device2: !include amdsg08_device2.yaml
+```
+
+This approach allows you to:
+- Use different Modbus addresses for each device
+- Give unique names to each set of sensors
+- Customize update intervals per device if needed
+- Keep all devices on the same RS485 bus
+
+**Note:** Each AMDSG08 device must have a unique Modbus address configured using its hardware settings.
 
 ## Entities Created
 
