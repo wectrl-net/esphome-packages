@@ -45,6 +45,7 @@ packages:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `amdsg08_prefix` | Prefix for all entities | `amdsg08` |
+| `amdsg08_names_prefix` | Optional prefix for display names (can be used for grouping or location info) | `""` (empty) |
 | `amdsg08_modbus_address` | Modbus address of the device | `0x01` |
 | `amdsg08_update_interval` | Update interval for sensor readings | `30s` |
 | `amdsg08_modbus_id` | ID of the modbus component to use | `modbus1` |
@@ -71,6 +72,20 @@ packages:
   amdsg08: github://wectrl-net/esphome-packages/amdsg08/amdsg08.yaml@develop
 ```
 
+### With Names Prefix Example
+
+```yaml
+packages:
+  temp_sensors:
+    url: https://github.com/wectrl-net/esphome-packages
+    files:
+      - path: amdsg08/amdsg08.yaml
+        vars:
+          amdsg08_names_prefix: "Basement "  # Note the space at the end for proper spacing
+          amdsg08_prefix: "basement"
+          amdsg08_modbus_address: "0x01"
+```
+
 ## Using Multiple AMDSG08 Devices
 
 The package is designed to allow multiple AMDSG08 devices to be easily configured by using ESPHome's external packages feature with custom substitutions for each device.
@@ -95,11 +110,12 @@ packages:
     files:
       - path: amdsg08/amdsg08.yaml
         vars:
+          amdsg08_names_prefix: "Rack 1 "
           amdsg08_prefix: "rack1"
           amdsg08_modbus_address: "0x01"
           amdsg08_modbus_id: "modbus1"
-          amdsg08_sensor_1_name: "Rack 1 Temp Sensor 1"
-          amdsg08_sensor_2_name: "Rack 1 Temp Sensor 2"
+          amdsg08_sensor_1_name: "Temp Sensor 1"
+          amdsg08_sensor_2_name: "Temp Sensor 2"
     ref: develop
     refresh: 1d
 
@@ -109,11 +125,12 @@ packages:
     files:
       - path: amdsg08/amdsg08.yaml
         vars:
+          amdsg08_names_prefix: "Rack 2 "
           amdsg08_prefix: "rack2"
           amdsg08_modbus_address: "0x02"
           amdsg08_modbus_id: "modbus1"
-          amdsg08_sensor_1_name: "Rack 2 Temp Sensor 1"
-          amdsg08_sensor_2_name: "Rack 2 Temp Sensor 2"
+          amdsg08_sensor_1_name: "Temp Sensor 1"
+          amdsg08_sensor_2_name: "Temp Sensor 2"
     ref: develop
     refresh: 1d
 ```
@@ -131,10 +148,11 @@ You can also use local package includes with different substitutions for each de
 ```yaml
 # First AMDSG08 device
 substitutions:
+  amdsg08_names_prefix: "Rack 1 "
   amdsg08_prefix: "rack1"
   amdsg08_modbus_address: "0x01"
   amdsg08_update_interval: 30s
-  amdsg08_sensor_1_name: "Rack 1 Temp Sensor 1"
+  amdsg08_sensor_1_name: "Temp Sensor 1"
   # ... and so on for all 8 channels
 
 packages:
@@ -142,10 +160,11 @@ packages:
 
 # Second AMDSG08 device
 substitutions:
+  amdsg08_names_prefix: "Rack 2 "
   amdsg08_prefix: "rack2"
   amdsg08_modbus_address: "0x02"
   amdsg08_update_interval: 30s
-  amdsg08_sensor_1_name: "Rack 2 Temp Sensor 1"
+  amdsg08_sensor_1_name: "Temp Sensor 1"
   # ... and so on for all 8 channels
 
 packages:
