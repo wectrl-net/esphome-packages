@@ -52,42 +52,9 @@ packages:
 
 ## Using Multiple AMDSG08 Devices
 
-To use multiple AMDSG08 devices on the same RS485 bus, you need to:
+The package is designed to allow multiple AMDSG08 devices to be defined in a single ESPHome configuration file by utilizing different substitution variables. The `amdsg08_prefix` and `amdsg08_modbus_address` variables allow you to create distinct configurations for each device.
 
-1. Create separate configuration files for each device with different prefixes and Modbus addresses
-2. Include these configurations in your main ESPHome configuration
-
-### Step 1: Create Device-Specific Configuration Files
-
-Create a separate file for each device (e.g., `amdsg08_device1.yaml`, `amdsg08_device2.yaml`) with unique substitution values:
-
-**amdsg08_device1.yaml:**
-```yaml
-substitutions:
-  amdsg08_prefix: "amdsg08_1"
-  amdsg08_modbus_address: "0x01"
-  amdsg08_update_interval: 30s
-  amdsg08_sensor_1_name: "Device 1 DS18B20 Channel 1"
-  # ... other substitutions with unique names
-
-# Include the base AMDSG08 package
-<<: !include amdsg08.yaml
-```
-
-**amdsg08_device2.yaml:**
-```yaml
-substitutions:
-  amdsg08_prefix: "amdsg08_2"
-  amdsg08_modbus_address: "0x02"
-  amdsg08_update_interval: 30s
-  amdsg08_sensor_1_name: "Device 2 DS18B20 Channel 1"
-  # ... other substitutions with unique names
-
-# Include the base AMDSG08 package
-<<: !include amdsg08.yaml
-```
-
-### Step 2: Include in Main Configuration
+### Example: Configuring Multiple Devices
 
 ```yaml
 # In your main ESPHome configuration
@@ -98,16 +65,77 @@ uart:
   baud_rate: 9600
   stop_bits: 1
 
+# First AMDSG08 device
+substitutions:
+  amdsg08_prefix: "amdsg08_1"
+  amdsg08_modbus_address: "0x01"
+  amdsg08_update_interval: 30s
+  amdsg08_sensor_1_name: "Device 1 Channel 1"
+  amdsg08_sensor_2_name: "Device 1 Channel 2"
+  # ... and so on for all 8 channels
+
 packages:
-  device1: !include amdsg08_device1.yaml
-  device2: !include amdsg08_device2.yaml
+  amdsg08_device1: !include amdsg08.yaml
+
+# Second AMDSG08 device
+substitutions:
+  amdsg08_prefix: "amdsg08_2"
+  amdsg08_modbus_address: "0x02"
+  amdsg08_update_interval: 30s
+  amdsg08_sensor_1_name: "Device 2 Channel 1"
+  amdsg08_sensor_2_name: "Device 2 Channel 2"
+  # ... and so on for all 8 channels
+
+packages:
+  amdsg08_device2: !include amdsg08.yaml
+```
+
+### Making the modbus_id Configurable
+
+To make the `modbus_id` configurable as well, you can add another substitution variable to the package. Edit the `amdsg08.yaml` file to add:
+
+```yaml
+substitutions:
+  # ... existing substitutions ...
+  amdsg08_modbus_id: "modbus1"  # Add this line
+  
+modbus_controller:
+  - id: ${amdsg08_prefix}_modbus_controller
+    address: ${amdsg08_modbus_address}
+    modbus_id: ${amdsg08_modbus_id}  # Use the variable here
+    setup_priority: -10
+    update_interval: ${amdsg08_update_interval}
+```
+
+Then in your configuration:
+
+```yaml
+# First AMDSG08 device
+substitutions:
+  amdsg08_prefix: "amdsg08_1"
+  amdsg08_modbus_address: "0x01"
+  amdsg08_modbus_id: "modbus1"  # Specify the modbus_id for each device
+  # ... other substitutions
+
+packages:
+  amdsg08_device1: !include amdsg08.yaml
+
+# Second AMDSG08 device
+substitutions:
+  amdsg08_prefix: "amdsg08_2"
+  amdsg08_modbus_address: "0x02"
+  amdsg08_modbus_id: "modbus1"  # Can use the same or different modbus_id
+  # ... other substitutions
+
+packages:
+  amdsg08_device2: !include amdsg08.yaml
 ```
 
 This approach allows you to:
-- Use different Modbus addresses for each device
-- Give unique names to each set of sensors
-- Customize update intervals per device if needed
-- Keep all devices on the same RS485 bus
+- Define multiple AMDSG08 devices in a single configuration
+- Use different prefixes and Modbus addresses for each device
+- Optionally use different Modbus interfaces (modbus_id) if needed
+- Keep unique naming for all sensors across devices
 
 **Note:** Each AMDSG08 device must have a unique Modbus address configured using its hardware settings.
 

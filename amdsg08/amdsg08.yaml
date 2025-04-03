@@ -2,6 +2,7 @@ substitutions:
   amdsg08_prefix: "amdsg08"
   amdsg08_modbus_address: "0x01"
   amdsg08_update_interval: 30s
+  amdsg08_modbus_id: "modbus1"
 
   # Default sensor names
   amdsg08_sensor_1_name: "DS18B20 Channel 1"
@@ -16,7 +17,7 @@ substitutions:
 modbus_controller:
   - id: ${amdsg08_prefix}_modbus_controller
     address: ${amdsg08_modbus_address}
-    modbus_id: modbus1
+    modbus_id: ${amdsg08_modbus_id}
     setup_priority: -10
     update_interval: ${amdsg08_update_interval}
 
