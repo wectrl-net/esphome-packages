@@ -24,11 +24,19 @@ packages:
 ### External Package Installation (Recommended)
 Use ESPHome's external packages feature to include this package directly from GitHub:
 
+#### Shorthand Method
+```yaml
+packages:
+  amdsg08: github://wectrl-net/esphome-packages/amdsg08/amdsg08.yaml@develop
+```
+
+#### Standard Method
 ```yaml
 packages:
   amdsg08:
     url: https://github.com/wectrl-net/esphome-packages
     file: amdsg08/amdsg08.yaml
+    ref: develop
     refresh: 1d
 ```
 
@@ -60,7 +68,7 @@ uart:
   stop_bits: 1
 
 packages:
-  amdsg08: !include amdsg08.yaml
+  amdsg08: github://wectrl-net/esphome-packages/amdsg08/amdsg08.yaml@develop
 ```
 
 ## Using Multiple AMDSG08 Devices
@@ -80,32 +88,34 @@ uart:
   baud_rate: 9600
   stop_bits: 1
 
-# First AMDSG08 device
+# First AMDSG08 device with shorthand method
 packages:
-  temp_rack1:
+  temp_rack1: 
     url: https://github.com/wectrl-net/esphome-packages
-    file: amdsg08/amdsg08.yaml
+    files:
+      - path: amdsg08/amdsg08.yaml
+        vars:
+          amdsg08_prefix: "rack1"
+          amdsg08_modbus_address: "0x01"
+          amdsg08_modbus_id: "modbus1"
+          amdsg08_sensor_1_name: "Rack 1 Temp Sensor 1"
+          amdsg08_sensor_2_name: "Rack 1 Temp Sensor 2"
+    ref: develop
     refresh: 1d
-    substitutions:
-      amdsg08_prefix: "rack1"
-      amdsg08_modbus_address: "0x01"
-      amdsg08_modbus_id: "modbus1"
-      amdsg08_sensor_1_name: "Rack 1 Temp Sensor 1"
-      amdsg08_sensor_2_name: "Rack 1 Temp Sensor 2"
-      # ... other sensor names as needed
 
   # Second AMDSG08 device
   temp_rack2:
     url: https://github.com/wectrl-net/esphome-packages
-    file: amdsg08/amdsg08.yaml
+    files:
+      - path: amdsg08/amdsg08.yaml
+        vars:
+          amdsg08_prefix: "rack2"
+          amdsg08_modbus_address: "0x02"
+          amdsg08_modbus_id: "modbus1"
+          amdsg08_sensor_1_name: "Rack 2 Temp Sensor 1"
+          amdsg08_sensor_2_name: "Rack 2 Temp Sensor 2"
+    ref: develop
     refresh: 1d
-    substitutions:
-      amdsg08_prefix: "rack2"
-      amdsg08_modbus_address: "0x02"
-      amdsg08_modbus_id: "modbus1" 
-      amdsg08_sensor_1_name: "Rack 2 Temp Sensor 1"
-      amdsg08_sensor_2_name: "Rack 2 Temp Sensor 2"
-      # ... other sensor names as needed
 ```
 
 Benefits of this approach:
