@@ -12,12 +12,24 @@ This package provides support for the AMDSG08 8-channel DS18B20 temperature sens
 
 ## Installation
 
+### Local Installation
 1. Copy the `amdsg08.yaml` file to your ESPHome configuration directory
 2. Include it in your device configuration:
 
 ```yaml
 packages:
   amdsg08: !include amdsg08.yaml
+```
+
+### External Package Installation (Recommended)
+Use ESPHome's external packages feature to include this package directly from GitHub:
+
+```yaml
+packages:
+  amdsg08:
+    url: https://github.com/wectrl-net/esphome-packages
+    file: amdsg08/amdsg08.yaml
+    refresh: 1d
 ```
 
 ## Configuration Variables
@@ -27,6 +39,7 @@ packages:
 | `amdsg08_prefix` | Prefix for all entities | `amdsg08` |
 | `amdsg08_modbus_address` | Modbus address of the device | `0x01` |
 | `amdsg08_update_interval` | Update interval for sensor readings | `30s` |
+| `amdsg08_modbus_id` | ID of the modbus component to use | `modbus1` |
 | `amdsg08_sensor_1_name` through `amdsg08_sensor_8_name` | Names for each temperature sensor | `DS18B20 Channel 1-8` |
 
 ## Requirements
@@ -52,9 +65,11 @@ packages:
 
 ## Using Multiple AMDSG08 Devices
 
-The package is designed to allow multiple AMDSG08 devices to be defined in a single ESPHome configuration file by utilizing different substitution variables. The `amdsg08_prefix` and `amdsg08_modbus_address` variables allow you to create distinct configurations for each device.
+The package is designed to allow multiple AMDSG08 devices to be easily configured by using ESPHome's external packages feature with custom substitutions for each device.
 
-### Example: Configuring Multiple Devices
+### Recommended Approach: Using External Packages
+
+This is the cleanest and most maintainable approach for defining multiple devices:
 
 ```yaml
 # In your main ESPHome configuration
@@ -66,76 +81,66 @@ uart:
   stop_bits: 1
 
 # First AMDSG08 device
-substitutions:
-  amdsg08_prefix: "amdsg08_1"
-  amdsg08_modbus_address: "0x01"
-  amdsg08_update_interval: 30s
-  amdsg08_sensor_1_name: "Device 1 Channel 1"
-  amdsg08_sensor_2_name: "Device 1 Channel 2"
-  # ... and so on for all 8 channels
-
 packages:
-  amdsg08_device1: !include amdsg08.yaml
+  temp_rack1:
+    url: https://github.com/wectrl-net/esphome-packages
+    file: amdsg08/amdsg08.yaml
+    refresh: 1d
+    substitutions:
+      amdsg08_prefix: "rack1"
+      amdsg08_modbus_address: "0x01"
+      amdsg08_modbus_id: "modbus1"
+      amdsg08_sensor_1_name: "Rack 1 Temp Sensor 1"
+      amdsg08_sensor_2_name: "Rack 1 Temp Sensor 2"
+      # ... other sensor names as needed
 
-# Second AMDSG08 device
-substitutions:
-  amdsg08_prefix: "amdsg08_2"
-  amdsg08_modbus_address: "0x02"
-  amdsg08_update_interval: 30s
-  amdsg08_sensor_1_name: "Device 2 Channel 1"
-  amdsg08_sensor_2_name: "Device 2 Channel 2"
-  # ... and so on for all 8 channels
-
-packages:
-  amdsg08_device2: !include amdsg08.yaml
+  # Second AMDSG08 device
+  temp_rack2:
+    url: https://github.com/wectrl-net/esphome-packages
+    file: amdsg08/amdsg08.yaml
+    refresh: 1d
+    substitutions:
+      amdsg08_prefix: "rack2"
+      amdsg08_modbus_address: "0x02"
+      amdsg08_modbus_id: "modbus1" 
+      amdsg08_sensor_1_name: "Rack 2 Temp Sensor 1"
+      amdsg08_sensor_2_name: "Rack 2 Temp Sensor 2"
+      # ... other sensor names as needed
 ```
 
-### Making the modbus_id Configurable
+Benefits of this approach:
+- Clean configuration with less repetition
+- Automatic updates when the package is updated (based on refresh interval)
+- No need to manually copy files
+- Easy to add and remove devices
 
-To make the `modbus_id` configurable as well, you can add another substitution variable to the package. Edit the `amdsg08.yaml` file to add:
+### Alternative Approach: Local Packages
 
-```yaml
-substitutions:
-  # ... existing substitutions ...
-  amdsg08_modbus_id: "modbus1"  # Add this line
-  
-modbus_controller:
-  - id: ${amdsg08_prefix}_modbus_controller
-    address: ${amdsg08_modbus_address}
-    modbus_id: ${amdsg08_modbus_id}  # Use the variable here
-    setup_priority: -10
-    update_interval: ${amdsg08_update_interval}
-```
-
-Then in your configuration:
+You can also use local package includes with different substitutions for each device:
 
 ```yaml
 # First AMDSG08 device
 substitutions:
-  amdsg08_prefix: "amdsg08_1"
+  amdsg08_prefix: "rack1"
   amdsg08_modbus_address: "0x01"
-  amdsg08_modbus_id: "modbus1"  # Specify the modbus_id for each device
-  # ... other substitutions
+  amdsg08_update_interval: 30s
+  amdsg08_sensor_1_name: "Rack 1 Temp Sensor 1"
+  # ... and so on for all 8 channels
 
 packages:
   amdsg08_device1: !include amdsg08.yaml
 
 # Second AMDSG08 device
 substitutions:
-  amdsg08_prefix: "amdsg08_2"
+  amdsg08_prefix: "rack2"
   amdsg08_modbus_address: "0x02"
-  amdsg08_modbus_id: "modbus1"  # Can use the same or different modbus_id
-  # ... other substitutions
+  amdsg08_update_interval: 30s
+  amdsg08_sensor_1_name: "Rack 2 Temp Sensor 1"
+  # ... and so on for all 8 channels
 
 packages:
   amdsg08_device2: !include amdsg08.yaml
 ```
-
-This approach allows you to:
-- Define multiple AMDSG08 devices in a single configuration
-- Use different prefixes and Modbus addresses for each device
-- Optionally use different Modbus interfaces (modbus_id) if needed
-- Keep unique naming for all sensors across devices
 
 **Note:** Each AMDSG08 device must have a unique Modbus address configured using its hardware settings.
 
