@@ -112,6 +112,7 @@ number:
     max_value: 247
     step: 1
     mode: box
+    accuracy_decimals: 0
     lambda: "return int(x);"
     write_lambda: "return uint16_t(x);"
 
@@ -125,6 +126,7 @@ number:
     max_value: 7
     step: 1
     mode: box
+    accuracy_decimals: 0
     lambda: "return int(x);"
     write_lambda: "return uint16_t(x);"
 
@@ -138,6 +140,7 @@ number:
     max_value: 2
     step: 1
     mode: box
+    accuracy_decimals: 0
     lambda: "return int(x);"
     write_lambda: "return uint16_t(x);"
 
@@ -152,6 +155,7 @@ number:
     step: 1
     unit_of_measurement: "s"
     mode: box
+    accuracy_decimals: 0
     lambda: "return int(x);"
     write_lambda: "return uint16_t(x);"
 
